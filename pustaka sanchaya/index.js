@@ -47,30 +47,30 @@ agent.addDataSource(createMongooseDataSource(connection, { flattenMode: 'auto' }
 //   });
 // });
 // Define a custom action for importing CSV files
-forest.collection('books').addAction('Import CSV', {
-  fields: [], // Define any additional fields needed for the action (optional)
-  type: 'global', // Specify the action type (global or record)
-});
+// forest.collection('books').addAction('Import CSV', {
+//   fields: [], // Define any additional fields needed for the action (optional)
+//   type: 'global', // Specify the action type (global or record)
+// });
 
-// Handle the custom action response
-forest.collection('books').addAction('Import CSV', async (req, res) => {
-  try {
-    // Make a request to trigger the CSV import process on the backend
-    const response = await fetch('/upload-csv', {
-      method: 'POST',
-      body: formData, // FormData object containing the CSV file
-    });
+// // Handle the custom action response
+// forest.collection('books').addAction('Import CSV', async (req, res) => {
+//   try {
+//     // Make a request to trigger the CSV import process on the backend
+//     const response = await fetch('/upload-csv', {
+//       method: 'POST',
+//       body: formData, // FormData object containing the CSV file
+//     });
 
-    const data = await response.json();
-    console.log(data); // Log the response from the backend
-    // Optionally, display a success message to the user
-    res.send({ success: true, message: 'CSV file imported successfully' });
-  } catch (error) {
-    console.error('Error importing CSV:', error);
-    // Handle errors and display appropriate messages to the user
-    res.status(500).send({ success: false, message: 'Failed to import CSV file' });
-  }
-});
+//     const data = await response.json();
+//     console.log(data); // Log the response from the backend
+//     // Optionally, display a success message to the user
+//     res.send({ success: true, message: 'CSV file imported successfully' });
+//   } catch (error) {
+//     console.error('Error importing CSV:', error);
+//     // Handle errors and display appropriate messages to the user
+//     res.status(500).send({ success: false, message: 'Failed to import CSV file' });
+//   }
+// });
 
 agent.customizeCollection('products', collection => {
   // Actions are documented here:

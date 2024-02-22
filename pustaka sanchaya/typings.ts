@@ -29,7 +29,6 @@ export type Schema = {
       '_id': string;
       'author_editor': string | null;
       'Date': string | null;
-      'displayName': string | null;
       'isbn': string | null;
       'language': string | null;
       'ProductForm': string | null;
