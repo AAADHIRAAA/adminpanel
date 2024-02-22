@@ -36,11 +36,45 @@ agent.customizeCollection('books', collection => {
     execute: async (context, resultBuilder) => {
       // Render HTML for file upload form
       const html = `
-        <form  method="post" enctype="multipart/form-data">
+      <!-- HTML for the file upload form -->
+      <div>
+        <p>Instructions: [Provide instructions here]</p>
+        <img src="/example_img.png" alt="Example CSV Image">
+        <form id="uploadForm" enctype="multipart/form-data">
           <input type="file" name="csvFile" accept=".csv">
-          <input type="submit" value="Upload CSV">
+          <button type="submit">Upload CSV</button>
         </form>
-      `;
+        <div id="uploadProgress"></div>
+      </div>
+
+      <script>
+        document.getElementById('uploadForm').addEventListener('submit', async function(event) {
+          event.preventDefault(); // Prevent form submission
+
+          const formData = new FormData(this);
+
+          // Display uploading progress
+          const progressElement = document.getElementById('uploadProgress');
+          progressElement.innerHTML = 'Uploading...';
+
+          try {
+            const response = await fetch('/upload-csv', {
+              method: 'POST',
+              body: formData
+            });
+
+            if (response.ok) {
+              progressElement.innerHTML = 'Upload successful!';
+            } else {
+              progressElement.innerHTML = 'Upload failed. Please try again.';
+            }
+          } catch (error) {
+            progressElement.innerHTML = 'Upload failed. Please try again.';
+            console.error('Error uploading CSV:', error);
+          }
+        });
+      </script>
+    `;
 
       // Return success response with HTML
       return resultBuilder.success('Upload CSV', {
