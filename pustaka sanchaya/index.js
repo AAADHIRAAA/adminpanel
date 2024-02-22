@@ -2,7 +2,7 @@ require('dotenv').config();
 const { createAgent } = require('@forestadmin/agent');
 const { createMongooseDataSource } = require('@forestadmin/datasource-mongoose');
 const connection = require('./models');
-
+const fs = require('fs');
 // Create the Forest Admin agent.
 /**
  * @type {import('@forestadmin/agent').Agent<import('./typings').Schema>}
@@ -30,75 +30,28 @@ agent.addDataSource(createMongooseDataSource(connection, { flattenMode: 'auto' }
 //
 // Here is some code to get your started
 //
-// agent.customizeCollection('books', collection => {
-//   collection.addField('displayName', {
-//     // Type of the new field
-//     columnType: 'String',
-
-//     // Dependencies which are needed to compute the new field (must not be empty)
-//     dependencies: ['language', 'Date'],
-
-//     // Compute function for the new field
-//     // Note that the function computes the new values in batches: the return value
-//     // must be an array which contains the new values in the same order than the
-//     // provided records.
-//     getValues: (records, context) =>
-//       records.map(r => `${r.language} ${r.Date}`),
-//   });
-// });
-// Define a custom action for importing CSV files
-// forest.collection('books').addAction('Import CSV', {
-//   fields: [], // Define any additional fields needed for the action (optional)
-//   type: 'global', // Specify the action type (global or record)
-// });
-
-// // Handle the custom action response
-// forest.collection('books').addAction('Import CSV', async (req, res) => {
-//   try {
-//     // Make a request to trigger the CSV import process on the backend
-//     const response = await fetch('/upload-csv', {
-//       method: 'POST',
-//       body: formData, // FormData object containing the CSV file
-//     });
-
-//     const data = await response.json();
-//     console.log(data); // Log the response from the backend
-//     // Optionally, display a success message to the user
-//     res.send({ success: true, message: 'CSV file imported successfully' });
-//   } catch (error) {
-//     console.error('Error importing CSV:', error);
-//     // Handle errors and display appropriate messages to the user
-//     res.status(500).send({ success: false, message: 'Failed to import CSV file' });
-//   }
-// });
-
-agent.customizeCollection('products', collection => {
-  // Actions are documented here:
-  // https://docs.forestadmin.com/developer-guide-agents-nodejs/agent-customization/actions
-  collection.addAction('Order new batch from supplier', {
-    scope: 'Single', // This action can be triggered product by product
-    form: [{ label: 'Quantity', type: 'Number', isRequired: true }],
+agent.customizeCollection('books', collection => {
+  collection.addAction('import', {
+    scope: 'Global',
     execute: async (context, resultBuilder) => {
-      const product = await context.getRecord(['id', 'name'])
-      const quantity = context.formValues['Quantity'];
+      // Render HTML for file upload form
+      const html = `
+        <form  method="post" enctype="multipart/form-data">
+          <input type="file" name="csvFile" accept=".csv">
+          <input type="submit" value="Upload CSV">
+        </form>
+      `;
 
-      // ... Perform work here ...
-
-      return resultBuilder.success(`Your order for a batch of ${quantity} '${product.name}' was sent`);
+      // Return success response with HTML
+      return resultBuilder.success('Upload CSV', {
+        html: html,
+      });
     }
-  });
+  })
 
-  // Search customization is documented here:
-  // https://docs.forestadmin.com/developer-guide-agents-nodejs/agent-customization/search
-  collection.replaceSearch(searchString => {
-    // user has typed a product id, let's only that column
-    // if (searchString.match(/^prdid[\d]{8}/$))
-    //   return { field: 'id', operator: 'Equal', value: searchString };
-
-    // Otherwise assume that user wants to search for a product by name
-    return { field: 'name', operator: 'Contains', value: searchString };
-  });
 });
+
+
 
 // Expose an HTTP endpoint.
 agent.mountOnStandaloneServer(Number(process.env.APPLICATION_PORT));
